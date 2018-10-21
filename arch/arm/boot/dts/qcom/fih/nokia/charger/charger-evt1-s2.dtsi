@@ -1,0 +1,108 @@
+/ {
+	/delete-node/ qcom,battery-data;
+	fih_batterydata: qcom,battery-data {
+		qcom,batt-id-range-pct = <15>;
+		//#include "fg-gen3-batterydata-ALT-3000mah-100k.dtsi"
+		//#include "fg-gen3-batterydata-coslight-3000mah-68k.dtsi"
+		//#include "fg-gen3-batterydata-fake-3000mah-39k.dtsi"
+		//#include "fg-gen3-batterydata-XF-3000mah-300k.dtsi"
+		//#include "fg-gen3-batterydata-coslight-3000mah-200k.dtsi"
+		#include "fg-gen3-batterydata-scud-3000mah-100k.dtsi"
+	//	#include "fg-gen3-batterydata-unkown-3000mah-ffffk.dtsi"
+	};
+};
+
+&usb3 {
+	dwc3@a800000 {
+		maximum-speed = "high-speed";
+	};
+};
+
+&pm660_fg {
+	qcom,battery-data = <&fih_batterydata>;
+	qcom,fg-cutoff-voltage = <3350>;
+	qcom,fg-empty-voltage = <3300>;
+	qcom,fg-vbatt-low-thr = <3350>;
+	qcom,fg-chg-term-current = <100>;	/* 100mA > 0.02C */
+	qcom,fg-sys-term-current = <(-125)>;	/* 100mA + 25mA */
+	qcom,fg-chg-term-base-current = <75>;	/* 100mA - 25mA */
+	qcom,fg-delta-soc-thr = <1>;
+	qcom,fg-recharge-soc-thr = <99>;
+	//qcom,fg-auto-recharge-soc; // ida disable the SOC-base recharge function
+	qcom,fg-auto-recharge-soc;
+	qcom,hold-soc-while-full;
+	qcom,fg-jeita-thresholds = <0 15 45 55>;
+	qcom,fg-force-load-profile;
+	qcom,fg-recharge-voltage = <4250>;
+	qcom,battery-thermal-coefficients = [a1 50 ff];
+	qcom,fg-rsense-sel = <0>;
+	qcom,fg-jeita-hyst-temp = <0>;
+	qcom,fg-batt-temp-delta = <2>;
+	qcom,hold-soc-while-full;
+};
+
+&pm660_charger {
+	/delete-property/ qcom,batteryless-platform;
+	//qcom,auto-recharge-soc;//
+	qcom,fcc-max-ua = <2100000>; //3000000 max charge current
+	qcom,usb-icl-ua = <3000000>;
+	qcom,fv-max-uv = <4400000>;
+	/delete-property/ qcom,wipower-max-uw;
+	qcom,step-charging-enable;
+	qcom,sw-jeita-enable;
+	qcom,wd-bark-time-secs = <64>;
+//	qcom,step-soc-thresholds = <50 55 60 63>;
+//	qcom,step-current-deltas = <1500000 0 0 0 0>;
+	fih,jeita_full_capacity = <1>;
+	fih_jeita_full_capacity_warm_temp = <450>;
+	fih,update_battery_status = <1>;
+	qcom,float-option = <1>;
+//	qcom,jeita-fv-comp-cool = <0>;		/* 4.4V = 4.4V - 0.0V */
+//	qcom,jeita-cc-comp-cool = <900000>;	/* 600mA = 1500mA - 900mA */
+//	qcom,jeita-fv-comp-warm = <300000>;	/* 4.1V = 4.4V - 0.3V */
+//	qcom,jeita-cc-comp-warm = <600000>;	/* 900mA = 1500mA - 600mA */
+	qcom,thermal-mitigation = <3000000 2700000 2500000 2300000 2100000 2000000
+		1600000 1200000 1000000 700000 600000 500000 100000 0>;
+/* VBAT_LOW	VBAT_HIGH	FCC */
+	qcom,step-fcc-cfg = <3000000 4180000 3000000>,
+					<4181000 4400000 1500000>;
+/* TEMP_LOW	TEMP_HIGH	FCC */
+	qcom,jeita-fcc-cfg = <0 157 600000>,
+					<158 440 3000000>,
+					<441 550 900000>;
+/* TEMP_LOW	TEMP_HIGH	FV */
+	qcom,jeita-fv-cfg = <0 157 4400000>,
+					<158 440 4400000>,
+					<441 550 4100000>;
+	qcom,step-fcc-hysteresis = <20000>;
+	qcom,jeita-fcc-fv-hysteresis = <9>;
+	//fih,aicl-rerun;
+	
+	/*
+	qcom,pmic-revid = <0x119>;
+	io-channels = <0x11a 0x8 0x11a 0xa 0x11a 0x3 0x11a 0x4>;
+	io-channel-names = "charger_temp", "charger_temp_max", "usbin_i", "usbin_v";
+	dpdm-supply = <0x11b>;
+	qcom,thermal-mitigation = <0x200b20 0x16e360 0x124f80 0xf4240 0xdbba0 0xc3500 0xaae60 0x927c0 0x7a120 0x61a80 0x493e0 0x30d40 0x186a0 0x0>;
+	qcom,sw-jeita-enable;
+	qcom,wd-bark-time-secs = <0x40>;
+	qcom,fcc-max-ua = <0x200b20>;
+	qcom,fv-max-uv = <0x432380>;
+	qcom,usb-icl-ua = <0x2dc6c0>;
+	qcom,boost-threshold-ua = <0x186a0>;
+	qcom,float-option = <0x1>;
+	qcom,auto-recharge-soc;
+	qcom,jeita-fcc-cfg = <0x0 0x9f 0x927c0 0xa0 0x1b8 0x200b20 0x1b9 0x226 0x16e360>;
+	qcom,jeita-fv-cfg = <0x0 0x1b8 0x432380 0x1b9 0x226 0x3e8fa0>;
+	qcom,jeita-fcc-fv-hysteresis = <0x9>;
+	fih,sdp-current-ua = <0x7a120>;
+	fih,hvdcp-current-ua = <0x16e360>;
+	fih,aicl-rerun;
+	*/
+};
+
+&i2c_2 {
+	smb1351-charger@1d {
+		status = "disabled";
+	};
+};
